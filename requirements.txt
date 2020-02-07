@@ -1,0 +1,15 @@
+certifi==2019.11.28
+chardet==3.0.4
+Click==7.0
+et-xmlfile==1.0.1
+Flask==1.1.1
+idna==2.8
+itsdangerous==1.1.0
+jdcal==1.4.1
+Jinja2==2.11.1
+MarkupSafe==1.1.1
+openpyxl==3.0.3
+pymed==0.8.9
+requests==2.22.0
+urllib3==1.25.8
+Werkzeug==0.16.1
