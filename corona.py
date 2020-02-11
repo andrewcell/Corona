@@ -1,6 +1,7 @@
 import os
 import sys
 import multiprocessing
+import webbrowser
 from openpyxl.styles import Alignment
 from pymed import PubMed
 from datetime import datetime
@@ -21,7 +22,6 @@ def createWorksheet(data):
         sheet.append(lst) # Add to worksheet
         for col in ["B", "C"]: # Enable Multi line on Title(Bn) Abstract(Cn) cell.
             sheet[col + str(id + 2)].alignment = Alignment(wrapText=True)
-
 
     table = Table(displayName="Data", ref="A1:C" + str(len(data) + 1)) # Make as Table
     style = TableStyleInfo(name="TableStyleLight9", showFirstColumn=False,
@@ -81,6 +81,7 @@ if __name__ == "__main__":
     if sys.platform.startswith('win'):
         # On Windows calling this function is necessary.
         multiprocessing.freeze_support()
+    webbrowser.open("http://127.0.0.1:5000/", autoraise=True) # Open Web browser to Local Server
     app.run()
 
 
