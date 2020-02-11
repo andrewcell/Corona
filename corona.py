@@ -12,24 +12,61 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 
 # Function for Create Excel file
 def createWorksheet(data):
+    #{ Example Data
+    #    "abstract": "Cancer remains a leading cause of death, despite multimodal treatment approaches. Even in patients with a healthy immune response, cancer cells can escape the immune system during tumorigenesis. Cancer cells incapacitate the normal cell-mediated immune system by expressing immune modulation ligands such as programmed death (PD) ligand 1, the B7 molecule, or secreting activators of immune modulators. Chimeric antigen receptor (CAR) T cells were originally designed to target cancer cells. Engineered approaches allow CAR T cells, which possess a simplified yet specific receptor, to be easily activated in limited situations. CAR T cell treatment is a derivative of the antigen-antibody reaction and can be applied to various diseases. In this review, the current successes of CAR T cells in cancer treatment and the therapeutic potential of CAR T cells are discussed.",
+    #    "authors": [
+    #        {
+    #            "affiliation": "Department of Pharmacology, Chonnam National University Medical School, Hwasun, Korea.",
+    #            "firstname": "Somy",
+    #            "initials": "S",
+    #            "lastname": "Yoon"
+    #        },
+    #        {
+    #            "affiliation": "Department of Pharmacology, Chonnam National University Medical School, Hwasun, Korea.",
+    #            "firstname": "Gwang Hyeon",
+    #            "initials": "GH",
+    #           "lastname": "Eom"
+    #       }
+    #    ],
+    #    "conclusions": null,
+    #    "copyrights": "\u00a9 Chonnam Medical Journal, 2020.",
+    #    "doi": "10.4068/cmj.2020.56.1.6",
+    #    "journal": "Chonnam medical journal",
+    #    "keywords": [
+    #        "CAR T cell",
+    #        "Combined Modality Therapy",
+    #        "Ligands",
+    #        "Neoplasms",
+    #        "T-Lymphocytes"
+    #    ],
+    #    "methods": null,
+    #    "publication_date": "2020-02-06",
+    #    "pubmed_id": "32021836\n17344846\n16417215\n25893595\n28799485\n11403834\n31019670\n29742380\n25510272\n28726836\n21994741\n26663085\n19459844\n30592986\n26568292\n30082599\n29385370\n28983798\n18034592\n25765070\n10585967\n31511695\n21293511\n28857075\n29855723\n23636127\n27785449\n25999455\n30261221\n19132916\n19636327\n27365313\n31723827\n28936279\n22129804\n29686425\n27626062\n30747012\n29389859\n25440610\n28652918\n29025771\n18986838\n28555670\n29667553\n28292435\n11585784\n24076584\n24432303\n25501578\n29226797\n18541331\n27207799\n18481901\n23546520\n30036350",
+    #    "results": null,
+    #    "title": "Chimeric Antigen Receptor T Cell Therapy: A Novel Modality for Immune Modulation.",
+    #    "xml": "<Element 'PubmedArticle' at 0x106847f50>"
+    #}
     wb = Workbook()
     sheet = wb.active
-    sheet.append(["Article ID", "Title", "Abstract"]) # Column Label in First Line.
+    sheet.append(["Article ID", "Title", "Abstract", "URL"]) # Column Label in First Line.
 
     for id, article in enumerate(data): # Read Data per article
-        print("Found : " + article.pubmed_id) # Print article Id for Debugging
-        lst = [article.pubmed_id, article.title, article.abstract] # ArticleID - Title - Abstract
+        print("Found : " + str(article.toJSON())) # Print article Id for Debugging
+        url = "https://www.ncbi.nlm.nih.gov/pubmed/" + article.pubmed_id
+        lst = [article.pubmed_id, article.title, article.abstract, url] # ArticleID - Title - Abstract - Article URL
         sheet.append(lst) # Add to worksheet
+        sheet['D' + str(id + 2)].hyperlink = url
         for col in ["B", "C"]: # Enable Multi line on Title(Bn) Abstract(Cn) cell.
             sheet[col + str(id + 2)].alignment = Alignment(wrapText=True)
 
-    table = Table(displayName="Data", ref="A1:C" + str(len(data) + 1)) # Make as Table
+    table = Table(displayName="Data", ref="A1:D" + str(len(data) + 1)) # Make as Table
     style = TableStyleInfo(name="TableStyleLight9", showFirstColumn=False,
                            showLastColumn=False, showRowStripes=True, showColumnStripes=True) # Add Style to Table
     table.tableStyleInfo = style
     sheet.add_table(table) # Apply Table to Worksheet
-    sheet.column_dimensions["B"].width = 150.0 # Expand cell width
-    sheet.column_dimensions["C"].width = 200.0
+    sheet.column_dimensions["B"].width = 100.0 # Expand cell width
+    sheet.column_dimensions["C"].width = 150.0
+    sheet.column_dimensions["D"].width = 40.0
 
 
     now = datetime.now().strftime("%m-%d-%Y, %H-%M-%S") # Current DateTime
