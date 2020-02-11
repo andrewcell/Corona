@@ -11,9 +11,8 @@ jobs:
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH; OUTPUT=corona-windows.exe; TAG=$(git log --format=%h -1)
     - name: "On macOS"
       os: osx
-      osx_image: xcode11.2
+      osx_image: xcode9.4
       language: shell
-      python: 3.5
       before_install:
         - pip3 install virtualenv
         - virtualenv env
