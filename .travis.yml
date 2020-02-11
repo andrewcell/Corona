@@ -13,6 +13,7 @@ jobs:
       os: osx
       osx_image: xcode11.2
       language: shell
+      python: 3.5
       before_install:
         - pip3 install virtualenv
         - virtualenv env
