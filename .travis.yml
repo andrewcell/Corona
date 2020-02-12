@@ -9,16 +9,6 @@ jobs:
         - choco install python --version 3.6.0
         - python -m pip install --upgrade pip
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH; OUTPUT=corona-windows.exe; TAG=$(git log --format=%h -1)
-    - name: "On macOS"
-      os: osx
-      osx_image: xcode9.4
-      language: shell
-      before_install:
-        - pip3 install virtualenv
-        - virtualenv env
-        - source env/bin/activate
-      env:
-        - OUTPUT=corona-macos
 # command to install dependencies
 install:
   - pip3 install -r requirements.txt
