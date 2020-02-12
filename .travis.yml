@@ -26,7 +26,7 @@ install:
   - pip3 install pyinstaller
 # command to run tests
 script:
-  - pyinstaller corona.py --onefile -n $OUTPUT
+  - pyinstaller --add-data 'templates:templates' --add-data 'static:static' --onefile -n $OUTPUT corona.py
   - ls -l dist
 before_deploy:
   - export RELEASE_TITLE="#$TRAVIS_BUILD_NUMBER"

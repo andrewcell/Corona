@@ -76,7 +76,12 @@ def createWorksheet(data):
         os.startfile(file) # Start Excel File. (Windows will launch default spreadsheet application)
     return now # Return filename
 
-app = Flask(__name__)
+if getattr(sys, 'frozen', False):
+    template_folder = os.path.join(sys._MEIPASS, 'templates')
+    static_folder = os.path.join(sys._MEIPASS, 'static')
+    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
+else:
+    app = Flask(__name__)
 
 store = list() # Search result will save here.
 
@@ -118,6 +123,7 @@ if __name__ == "__main__":
     if sys.platform.startswith('win'):
         # On Windows calling this function is necessary.
         multiprocessing.freeze_support()
+
     webbrowser.open("http://127.0.0.1:5000/", autoraise=True) # Open Web browser to Local Server
     app.run()
 
