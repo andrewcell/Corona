@@ -7,7 +7,9 @@
         {% if err %}
             <h3>{{err}}</h3>
         {% endif %}
+
         <div class="container">
+            <img src="/static/logo.svg" style="height: 30%; width: 30%">
             <form id="queryForm" action="/" method="post">
                 <div class="form-group">
                     <label for="query">Query</label>
@@ -25,7 +27,7 @@
                                 <option>4</option>
                              </select>
                          </div>
-                            <input type="text" name="value" class="form-control" index="1">
+                            <input type="text" name="value" class="form-control" index="1" placeholder="여기에 영문으로 검색하세요.">
                          </div>
                 </div>
                 <input type="button" id="add" class="btn btn-danger" value="Add" />
@@ -34,15 +36,28 @@
         </div>
         {% if data %}
             <form action="/open", method="post">
-                <ol>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">Journal</th>
+                      <th scope="col">Title</th>
+                      <th scope="col">Abstract</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {% for article in data %}
-                    <li><input type="checkbox" name="selected" value={{loop.index-1}} checked>{{article.title}}</input>
-                    <p>{{article.abstract}}</p>
-                    </li>
-                        <!--<li> {{article.title}} </li>-->
+                        <tr>
+                          <th scope="row"><input type="checkbox" name="selected" value={{loop.index-1}} checked /></th>
+                          <td>{{article.journalissue["ISOName"] + " " + article.journalissue["PubDate_Year"]}}</td>
+                          <td>{{article.title}}</td>
+                          <td>{{article.abstract}}</td>
+                        </tr>
                     {% endfor %}
-                </ol>
-                <button>Submit</button>
+                  </tbody>
+                </table>
+
+                <button class="btn btn-success">Submit</button>
             </form>
         {% endif %}
 

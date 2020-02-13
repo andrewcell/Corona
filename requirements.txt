@@ -9,7 +9,6 @@ jdcal==1.4.1
 Jinja2==2.11.1
 MarkupSafe==1.1.1
 openpyxl==3.0.3
-pymed==0.8.9
 requests==2.22.0
 urllib3==1.25.8
 Werkzeug==1.0.0

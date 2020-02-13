@@ -1,52 +1,15 @@
 function generateOptions() {
     const values = [
-        "Affiliation",
-        "All Fields",
-        "Author",
-        "Author - Corporate",
-        "Author - First",
-        "Author - Full",
-        "Author - Identifier",
-        "Author - Last",
-        "Book",
-        "Conflict of Interest Statements",
-        "Date - Completion",
-        "Date - Create",
-        "Date - Entrez",
-        "Date - MeSH",
-        "Date - Modification",
-        "Date - Publication",
-        "EC/RN Number",
-        "Editor",
-        "Filter",
-        "Grant Number",
-        "ISBN",
-        "Investigator",
-        "Investigator - Full",
-        "Issue",
-        "Journal",
-        "Language",
-        "Location ID",
-        "MeSH Major Topic",
-        "MeSH Subheading",
-        "MeSH Terms",
-        "Other Term",
-        "Pagination",
-        "Pharmacological Action",
-        "Publication Type",
-        "Publisher",
-        "Secondary Source ID",
-        "Subject - Personal Name",
-        "Supplementary Concept",
-        "Text Word",
-        "Title",
-        "Title/Abstract",
-        "Transliterated Title",
-        "Volume"
+        ["All Fields", "전체(질환/성분)"],
+        ["Author", "저자"],
+        ["Journal", "저널명"],
+        ["Title", "논문제목"],
+        //["Date - Publication", "발행연도"],
+        ["Title/Abstract", "논문제목/요약"]
     ];
     var tag = "";
     values.forEach(function (value) {
-        tag = tag + "<option value='" + value + "'>" + value + "</option>";
+        tag = tag + "<option value='" + value[0] + "'>" + value[1] + "</option>";
     });
     return tag;
 }
@@ -117,7 +80,7 @@ $(document).ready(function() {
                     generateOptions() +
             '    </select>' +
             '</div>' +
-            '<input type="text" name="value" index="' + count + '" class="form-control">' +
+            '<input type="text" name="value" index="' + count + '" class="form-control" placeholder="여기에 영문으로 검색하세요.">' +
             '<div class="input-group-append">' +
             '    <input type="button" class="btn btn-outline-secondary" type="button" id="delete" data-index="' + count + '" value="Delete"/>' +
             '  </div>' +
