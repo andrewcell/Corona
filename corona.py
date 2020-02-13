@@ -51,7 +51,7 @@ def createWorksheet(data):
     sheet.append(["Article ID", "Title", "Abstract", "URL"]) # Column Label in First Line.
 
     for id, article in enumerate(data): # Read Data per article
-        print("Found : " + str(article.toJSON())) # Print article Id for Debugging
+        print("Found : " + article.pubmed_id) # Print article Id for Debugging
         url = "https://www.ncbi.nlm.nih.gov/pubmed/" + article.pubmed_id
         lst = [article.pubmed_id, article.title, article.abstract, url] # ArticleID - Title - Abstract - Article URL
         sheet.append(lst) # Add to worksheet

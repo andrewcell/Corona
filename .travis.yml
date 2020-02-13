@@ -8,6 +8,7 @@ jobs:
       before_install:
         - choco install python --version 3.6.0
         - python -m pip install --upgrade pip
+        - pip3 install pywin32
       env: PATH=/c/Python36:/c/Python36/Scripts:$PATH; OUTPUT=corona-windows.exe; TAG=$(git log --format=%h -1)
 # command to install dependencies
 install:
