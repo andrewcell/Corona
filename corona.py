@@ -11,7 +11,7 @@ import webbrowser
 from openpyxl.styles import Alignment
 from pymed import PubMed
 from datetime import datetime
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from openpyxl import Workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
@@ -118,21 +118,23 @@ def root():
         return render_template('index.html')
 
 
-@app.route("/open", methods=["POST"]) # Export to Spreadsheet from selected article.
+@app.route("/open", methods=["POST", "GET"]) # Export to Spreadsheet from selected article.
 def open():
     global store
-    if (not "selected" in request.form) or request.form["selected"] == "": # If Selected article is empty or not exist
-        return render_template("index.html", err="You must fill query input field.")
+    if request.method == "POST":
+        if (not "selected" in request.form) or request.form["selected"] == "": # If Selected article is empty or not exist
+            return render_template("index.html", err="You must fill query input field.")
 
-    lists = []
+        lists = []
 
-    for item in request.form.getlist("selected"):
-        lists.append(store[int(item)]) # Each selected item add to lists
+        for item in request.form.getlist("selected"):
+            lists.append(store[int(item)]) # Each selected item add to lists
 
-    filename = createWorksheet(lists)
-    if filename: # If Filename returned, Add Message that is created.
-        return render_template("index.html", err=filename+".xlsx is created.")
-
+        filename = createWorksheet(lists)
+        if filename: # If Filename returned, Add Message that is created.
+            return render_template("index.html", err=filename+".xlsx is created.")
+    else:
+        return redirect(url_for('root'))
 
 if __name__ == "__main__":
     if sys.platform.startswith('win'):
