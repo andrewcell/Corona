@@ -81,9 +81,10 @@ def createWorksheet(data):
                            showLastColumn=False, showRowStripes=True, showColumnStripes=True) # Add Style to Table
     table.tableStyleInfo = style
     sheet.add_table(table) # Apply Table to Worksheet
-    sheet.column_dimensions["B"].width = 100.0 # Expand cell width
-    sheet.column_dimensions["C"].width = 150.0
-    sheet.column_dimensions["D"].width = 40.0
+    sheet.column_dimensions["A"].width = 15.0 # 15px for Journal
+    sheet.column_dimensions["B"].width = 100.0 # 100px for Title
+    sheet.column_dimensions["C"].width = 150.0 # 150px for Abstract
+    sheet.column_dimensions["D"].width = 40.0 # 40px for URL
 
 
     now = datetime.now().strftime("%m-%d-%Y, %H-%M-%S") # Current DateTime
@@ -107,7 +108,6 @@ def root():
     global store # Will use global variable, defined above.
     if request.method == 'POST': # If is request from Form.
         pubmed = PubMed(tool="MyTool", email="my@email.address")
-        #query = "occupational health[Title]"
         if (not "query" in request.form) or request.form["query"] == "": # If Search Query is empty or not exist
             return render_template("index.html", err="You must fill query input field.")
         query = request.form["query"] # Get querty from request parameters.
@@ -143,5 +143,5 @@ if __name__ == "__main__":
         # On Windows calling this function is necessary.
         multiprocessing.freeze_support()
 
-    webbrowser.open("http://127.0.0.1:5000/", autoraise=True) # Open Web browser to Local Server
-    app.run()
+    webbrowser.open("http://127.0.0.1:8484/", autoraise=True) # Open Web browser to Local Server
+    app.run(port=8484)
