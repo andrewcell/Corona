@@ -134,6 +134,6 @@ if __name__ == "__main__":
         multiprocessing.freeze_support()
 
     webbrowser.open("http://127.0.0.1:5000/", autoraise=True) # Open Web browser to Local Server
-    app.run(host="0.0.0.0")
+    app.run()
 
 
