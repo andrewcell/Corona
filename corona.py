@@ -71,7 +71,7 @@ def createWorksheet(data):
         lst = [article.journalissue["ISOName"] + " " + journalyear, article.title, article.abstract, url] # ArticleID - Title - Abstract - Article URL
         sheet.append(lst) # Add to worksheet
         sheet['D' + str(id + 2)].hyperlink = url
-        for col in ["A", "B", "C", "D"]: # Enable Multi line on Title(Bn) Abstract(Cn) cell.
+        for col in ["A", "B", "C", "D"]: # Enable Multi line all column.
             sheet[col + str(id + 2)].alignment = Alignment(wrapText=True, vertical='center')
 
 
@@ -134,7 +134,7 @@ def open():
 
         filename = createWorksheet(lists)
         if filename: # If Filename returned, Add Message that is created.
-            return render_template("index.html", err=filename+".xlsx is created.")
+            return render_template("index.html", msg=filename+".xlsx is created.")
     else:
         return redirect(url_for('root'))
 
