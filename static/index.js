@@ -37,17 +37,20 @@ function generateQuery() {
         var value = undefined;
 
         if( arr[i + 2].value !== "") {
-            if (startsWith(arr[1].name, "operator")) {
+            if (startsWith(arr[i].name, "operator")) {
                 operator = arr[i].value.toUpperCase();
             }
-            /*if (arr[i].name.startsWith("operator")) {
+            /*if (arr[i].name.startsWith("operator")) { // Not working in Internet Explorer.
                 operator = arr[i].value.toUpperCase();
             }*/
+            
             if (arr[i + 1].name === "type") {
                 type = arr[i + 1].value;
             }
+            
             if (arr[i + 2].name === "value") {
                 value = arr[i + 2].value;
+                
             }
 
             query = query + " " + operator + " " + value;
