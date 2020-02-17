@@ -38,8 +38,12 @@
                 <input type="button" id="search" class="btn btn-primary" value="Search" />
             </form>
         </div>
+        &nbsp;
         {% if data %}
             <form action="/open", method="post">
+                {% if resultMsg %}
+                    <div class="alert alert-success" role="alert">{{resultMsg}}</div>
+                {% endif %}
                 <table class="table">
                   <thead>
                     <tr>

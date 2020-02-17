@@ -115,7 +115,13 @@ def root():
         # Execute the query against the API
         results = pubmed.query(query, max_results=100) # Max Result as 100
         store = list(results) # Save result to global variable for further use.
-        return render_template('index.html', data=store)
+
+        if len(store) == 100:
+            resultMessage = "검색 결과가 많아 100개로 제한하였습니다. 검색어를 구체화하세요."
+        else:
+            resultMessage = str(len(store)) + "개를 찾았습니다."
+
+        return render_template('index.html', data=store, resultMsg=resultMessage)
     else:
         return render_template('index.html')
 
