@@ -60,7 +60,7 @@ def createWorksheet(data):
 
         print(str(article.toJSON()))
 
-        print("Found : " + article.pubmed_id) # Print article Id for Debugging
+        #print("Found : " + article.pubmed_id) # Print article Id for Debugging
         url = "https://www.ncbi.nlm.nih.gov/pubmed/" + article.pubmed_id
 
         if article.journalissue["PubDate_Year"] is None:
@@ -72,7 +72,7 @@ def createWorksheet(data):
         sheet.append(lst) # Add to worksheet
         sheet['D' + str(id + 2)].hyperlink = url
         for col in ["A", "B", "C", "D"]: # Enable Multi line on Title(Bn) Abstract(Cn) cell.
-            sheet[col + str(id + 2)].alignment = Alignment(wrapText=True, horizontal='center')
+            sheet[col + str(id + 2)].alignment = Alignment(wrapText=True, vertical='center')
 
 
 
