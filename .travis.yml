@@ -18,7 +18,7 @@ install:
 script:
   - ls -l
   - pyinstaller --add-data 'templates;templates' --add-data 'static;static' --add-data 'pymed;pymed' --onefile --noconsole -n $OUTPUT corona.py
-  - pyinstaller --add-data 'templates;templates' --add-data 'static;static' --add-data 'pymed;pymed' --onefile -n corona-windows-dbg.exe corona.py
+  #- pyinstaller --add-data 'templates;templates' --add-data 'static;static' --add-data 'pymed;pymed' --onefile -n corona-windows-dbg.exe corona.py
   - ls -l dist
 before_deploy:
   - export RELEASE_TITLE="#$TRAVIS_BUILD_NUMBER"
