@@ -14,6 +14,10 @@ function generateOptions() {
     return tag;
 }
 
+function startsWith(str, word) {
+    return str.lastIndexOf(word, 0) === 0;
+}
+
 function generateQuery() {
     const queryField = $("#query");
 
@@ -33,9 +37,12 @@ function generateQuery() {
         var value = undefined;
 
         if( arr[i + 2].value !== "") {
-            if (arr[i].name.startsWith("operator")) {
+            if (startsWith(arr[1].name, "operator")) {
                 operator = arr[i].value.toUpperCase();
             }
+            /*if (arr[i].name.startsWith("operator")) {
+                operator = arr[i].value.toUpperCase();
+            }*/
             if (arr[i + 1].name === "type") {
                 type = arr[i + 1].value;
             }
