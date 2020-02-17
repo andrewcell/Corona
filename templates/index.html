@@ -43,19 +43,21 @@
                 <table class="table">
                   <thead>
                     <tr>
-                      <th scope="col">#</th>
-                      <th scope="col">Journal</th>
-                      <th scope="col">Title</th>
-                      <th scope="col">Abstract</th>
+                        <th scope="col">#</th>
+                        <th scope="col">Include</th>
+                        <th scope="col">Journal</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Abstract</th>
                     </tr>
                   </thead>
                   <tbody>
                     {% for article in data %}
                         <tr>
-                          <th scope="row"><input type="checkbox" name="selected" value={{loop.index-1}} checked /></th>
-                          <td>{{article.journalissue["ISOName"] + " " + article.journalissue["PubDate_Year"] ~ ""}}</td>
-                          <td>{{article.title}}</td>
-                          <td>{{article.abstract}}</td>
+                            <td>{{loop.index}}</td>
+                            <th scope="row"><input type="checkbox" name="selected" value={{loop.index-1}} checked /></th>
+                            <td>{{article.journalissue["ISOName"] + " " + article.journalissue["PubDate_Year"] ~ ""}}</td>
+                            <td width="12%">{{article.title}}</td>
+                            <td>{{article.abstract}}</td>
                         </tr>
                     {% endfor %}
                   </tbody>
