@@ -57,7 +57,12 @@ def createWorksheet(data):
         print("Found : " + article.pubmed_id) # Print article Id for Debugging
         url = "https://www.ncbi.nlm.nih.gov/pubmed/" + article.pubmed_id
 
-        lst = [article.journalissue["ISOName"] + " " + article.journalissue["PubDate_Year"], article.title, article.abstract, url] # ArticleID - Title - Abstract - Article URL
+        if article.journalissue["PubDate_Year"] is None:
+            journalyear = ""
+        else:
+            journalyear = article.journalissue["PubDate_Year"]
+
+        lst = [article.journalissue["ISOName"] + " " + journalyear, article.title, article.abstract, url] # ArticleID - Title - Abstract - Article URL
         sheet.append(lst) # Add to worksheet
         sheet['D' + str(id + 2)].hyperlink = url
         for col in ["B", "C"]: # Enable Multi line on Title(Bn) Abstract(Cn) cell.
