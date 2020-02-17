@@ -71,8 +71,10 @@ def createWorksheet(data):
         lst = [article.journalissue["ISOName"] + " " + journalyear, article.title, article.abstract, url] # ArticleID - Title - Abstract - Article URL
         sheet.append(lst) # Add to worksheet
         sheet['D' + str(id + 2)].hyperlink = url
-        for col in ["B", "C"]: # Enable Multi line on Title(Bn) Abstract(Cn) cell.
-            sheet[col + str(id + 2)].alignment = Alignment(wrapText=True)
+        for col in ["A", "B", "C", "D"]: # Enable Multi line on Title(Bn) Abstract(Cn) cell.
+            sheet[col + str(id + 2)].alignment = Alignment(wrapText=True, horizontal='center')
+
+
 
     table = Table(displayName="Data", ref="A1:D" + str(len(data) + 1)) # Make as Table
     style = TableStyleInfo(name="TableStyleLight9", showFirstColumn=False,
