@@ -146,19 +146,7 @@ def open():
 
 @app.route("/terminate", methods=["GET"])
 def terminate():
-    if sys.platform.startswith('win'):
-        try:
-            from win10toast import ToastNotifier
-            toaster = ToastNotifier()
-            toaster.show_toast("Python EXE",
-                                "Program is successfully terminated.",
-                                icon_path=None,
-                                duration=5,
-                                threaded=False)
-        except:
-            os._exit(0)
-    else:
-        os._exit(0)
+    os._exit(0)
 
 if __name__ == "__main__":
     if sys.platform.startswith('win'):
