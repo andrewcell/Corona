@@ -9,6 +9,8 @@ jobs:
         - choco install python --version 3.7.0
         - python -m pip install --upgrade pip
         - pip3 install pywin32
+        - pip3 install win10toast
+        - pip3 install setuptools
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH; OUTPUT=corona-windows.exe; TAG=$(git log --format=%h -1)
 # command to install dependencies
 install:

@@ -144,6 +144,22 @@ def open():
     else:
         return redirect(url_for('root'))
 
+@app.route("/terminate", methods=["GET"])
+def terminate():
+    if sys.platform.startswith('win'):
+        try:
+            from win10toast import ToastNotifier
+            toaster = ToastNotifier()
+            toaster.show_toast("Example two",
+                                "This notification is in it's own thread!",
+                                icon_path=None,
+                                duration=10,
+                                threaded=False)
+        except:
+            os._exit(0)
+    else:
+        os._exit(0)
+        
 if __name__ == "__main__":
     if sys.platform.startswith('win'):
         # On Windows calling this function is necessary.
