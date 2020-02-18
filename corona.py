@@ -150,16 +150,16 @@ def terminate():
         try:
             from win10toast import ToastNotifier
             toaster = ToastNotifier()
-            toaster.show_toast("Example two",
-                                "This notification is in it's own thread!",
+            toaster.show_toast("Python EXE",
+                                "Program is successfully terminated.",
                                 icon_path=None,
-                                duration=10,
+                                duration=5,
                                 threaded=False)
         except:
             os._exit(0)
     else:
         os._exit(0)
-        
+
 if __name__ == "__main__":
     if sys.platform.startswith('win'):
         # On Windows calling this function is necessary.
