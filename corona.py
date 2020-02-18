@@ -18,7 +18,7 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 
 # Function for Create Excel file
 def createWorksheet(data):
-    #{ Example Data
+    # { Example Data
     #    "abstract": "Cancer remains a leading cause of death, despite multimodal treatment approaches. Even in patients with a healthy immune response, cancer cells can escape the immune system during tumorigenesis. Cancer cells incapacitate the normal cell-mediated immune system by expressing immune modulation ligands such as programmed death (PD) ligand 1, the B7 molecule, or secreting activators of immune modulators. Chimeric antigen receptor (CAR) T cells were originally designed to target cancer cells. Engineered approaches allow CAR T cells, which possess a simplified yet specific receptor, to be easily activated in limited situations. CAR T cell treatment is a derivative of the antigen-antibody reaction and can be applied to various diseases. In this review, the current successes of CAR T cells in cancer treatment and the therapeutic potential of CAR T cells are discussed.",
     #    "authors": [
     #        {
@@ -51,16 +51,14 @@ def createWorksheet(data):
     #    "results": null,
     #    "title": "Chimeric Antigen Receptor T Cell Therapy: A Novel Modality for Immune Modulation.",
     #    "xml": "<Element 'PubmedArticle' at 0x106847f50>"
-    #}
+    # }
     wb = Workbook()
     sheet = wb.active
-    sheet.append(["Journal", "Title", "Abstract", "URL"]) # Column Label in First Line.
+    sheet.append(["Journal", "Title", "Abstract", "URL"])  # Column Label in First Line.
 
-    for id, article in enumerate(data): # Read Data per article
+    for id, article in enumerate(data):  # Read Data per article
+        print("Found : " + article.pubmed_id)  # Print article Id for Debugging
 
-        print(str(article.toJSON()))
-
-        #print("Found : " + article.pubmed_id) # Print article Id for Debugging
         url = "https://www.ncbi.nlm.nih.gov/pubmed/" + article.pubmed_id
 
         if article.journalissue["PubDate_Year"] is None:
@@ -68,31 +66,30 @@ def createWorksheet(data):
         else:
             journalyear = article.journalissue["PubDate_Year"]
 
-        lst = [article.journalissue["ISOName"] + " " + journalyear, article.title, article.abstract, url] # ArticleID - Title - Abstract - Article URL
-        sheet.append(lst) # Add to worksheet
+        lst = [article.journalissue["ISOName"] + " " + journalyear, article.title, article.abstract,
+               url]  # ArticleID - Title - Abstract - Article URL
+        sheet.append(lst)  # Add to worksheet
         sheet['D' + str(id + 2)].hyperlink = url
-        for col in ["A", "B", "C", "D"]: # Enable Multi line all column.
+        for col in ["A", "B", "C", "D"]:  # Enable Multi line all column.
             sheet[col + str(id + 2)].alignment = Alignment(wrapText=True, vertical='center')
 
-
-
-    table = Table(displayName="Data", ref="A1:D" + str(len(data) + 1)) # Make as Table
+    table = Table(displayName="Data", ref="A1:D" + str(len(data) + 1))  # Make as Table
     style = TableStyleInfo(name="TableStyleLight9", showFirstColumn=False,
-                           showLastColumn=False, showRowStripes=True, showColumnStripes=True) # Add Style to Table
+                           showLastColumn=False, showRowStripes=True, showColumnStripes=True)  # Add Style to Table
     table.tableStyleInfo = style
-    sheet.add_table(table) # Apply Table to Worksheet
-    sheet.column_dimensions["A"].width = 15.0 # 15px for Journal
-    sheet.column_dimensions["B"].width = 100.0 # 100px for Title
-    sheet.column_dimensions["C"].width = 150.0 # 150px for Abstract
-    sheet.column_dimensions["D"].width = 40.0 # 40px for URL
+    sheet.add_table(table)  # Apply Table to Worksheet
+    sheet.column_dimensions["A"].width = 15.0  # 15px for Journal
+    sheet.column_dimensions["B"].width = 100.0  # 100px for Title
+    sheet.column_dimensions["C"].width = 150.0  # 150px for Abstract
+    sheet.column_dimensions["D"].width = 40.0  # 40px for URL
 
+    now = datetime.now().strftime("%m-%d-%Y, %H-%M-%S")  # Current DateTime
+    wb.save(now + ".xlsx")  # Save File with current datetime
+    file = now + ".xlsx"
+    if sys.platform.startswith('win'):  # If run on Microsoft Windows
+        os.startfile(file)  # Start Excel File. (Windows will launch default spreadsheet application)
+    return now  # Return filename
 
-    now = datetime.now().strftime("%m-%d-%Y, %H-%M-%S") # Current DateTime
-    wb.save(now+".xlsx") # Save File with current datetime
-    file = now+".xlsx"
-    if sys.platform.startswith('win'): # If run on Microsoft Windows
-        os.startfile(file) # Start Excel File. (Windows will launch default spreadsheet application)
-    return now # Return filename
 
 if getattr(sys, 'frozen', False):
     template_folder = os.path.join(sys._MEIPASS, 'templates')
@@ -101,20 +98,21 @@ if getattr(sys, 'frozen', False):
 else:
     app = Flask(__name__)
 
-store = list() # Search result will save here.
+store = list()  # Search result will save here.
 
-@app.route("/", methods=["GET", "POST"]) # Homepage
+
+@app.route("/", methods=["GET", "POST"])  # Homepage
 def root():
-    global store # Will use global variable, defined above.
-    if request.method == 'POST': # If is request from Form.
+    global store  # Will use global variable, defined above.
+    if request.method == 'POST':  # If is request from Form.
         pubmed = PubMed(tool="MyTool", email="my@email.address")
-        if (not "query" in request.form) or request.form["query"] == "": # If Search Query is empty or not exist
+        if (not "query" in request.form) or request.form["query"] == "":  # If Search Query is empty or not exist
             return render_template("index.html", err="You must fill query input field.")
-        query = request.form["query"] # Get querty from request parameters.
+        query = request.form["query"]  # Get querty from request parameters.
 
         # Execute the query against the API
-        results = pubmed.query(query, max_results=100) # Max Result as 100
-        store = list(results) # Save result to global variable for further use.
+        results = pubmed.query(query, max_results=100)  # Max Result as 100
+        store = list(results)  # Save result to global variable for further use.
 
         if len(store) == 100:
             resultMessage = "검색 결과가 많아 100개로 제한하였습니다. 검색어를 구체화하세요."
@@ -126,32 +124,46 @@ def root():
         return render_template('index.html')
 
 
-@app.route("/open", methods=["POST", "GET"]) # Export to Spreadsheet from selected article.
+@app.route("/open", methods=["POST", "GET"])  # Export to Spreadsheet from selected article.
 def open():
     global store
     if request.method == "POST":
-        if (not "selected" in request.form) or request.form["selected"] == "": # If Selected article is empty or not exist
+        if (not "selected" in request.form) or request.form[
+            "selected"] == "":  # If Selected article is empty or not exist
             return render_template("index.html", err="You must fill query input field.")
 
         lists = []
 
         for item in request.form.getlist("selected"):
-            lists.append(store[int(item)]) # Each selected item add to lists
+            lists.append(store[int(item)])  # Each selected item add to lists
 
         filename = createWorksheet(lists)
-        if filename: # If Filename returned, Add Message that is created.
-            return render_template("index.html", msg=filename+".xlsx is created.")
+        if filename:  # If Filename returned, Add Message that is created.
+            return render_template("index.html", msg=filename + ".xlsx is created.")
     else:
         return redirect(url_for('root'))
+
 
 @app.route("/terminate", methods=["GET"])
 def terminate():
     os._exit(0)
+
+@app.after_request
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'public, max-age=0'
+    return r
 
 if __name__ == "__main__":
     if sys.platform.startswith('win'):
         # On Windows calling this function is necessary.
         multiprocessing.freeze_support()
 
-    webbrowser.open("http://127.0.0.1:8484/", autoraise=True) # Open Web browser to Local Server
+    webbrowser.open("http://127.0.0.1:8484/", autoraise=True)  # Open Web browser to Local Server
     app.run(port=8484)
