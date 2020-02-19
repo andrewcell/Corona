@@ -16,7 +16,7 @@ from openpyxl import Workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 
-# Function for Create Excel file
+# 엑셀 파일 생
 def createWorksheet(data):
     # { Example Data
     #    "abstract": "Cancer remains a leading cause of death, despite multimodal treatment approaches. Even in patients with a healthy immune response, cancer cells can escape the immune system during tumorigenesis. Cancer cells incapacitate the normal cell-mediated immune system by expressing immune modulation ligands such as programmed death (PD) ligand 1, the B7 molecule, or secreting activators of immune modulators. Chimeric antigen receptor (CAR) T cells were originally designed to target cancer cells. Engineered approaches allow CAR T cells, which possess a simplified yet specific receptor, to be easily activated in limited situations. CAR T cell treatment is a derivative of the antigen-antibody reaction and can be applied to various diseases. In this review, the current successes of CAR T cells in cancer treatment and the therapeutic potential of CAR T cells are discussed.",
@@ -54,91 +54,88 @@ def createWorksheet(data):
     # }
     wb = Workbook()
     sheet = wb.active
-    sheet.append(["Journal", "Title", "Abstract", "URL"])  # Column Label in First Line.
+    sheet.append(["Journal", "Title", "Abstract", "URL"])  # 테이블의 컬럼명을 첫 줄에 입력.
 
-    for id, article in enumerate(data):  # Read Data per article
-        print("Found : " + article.pubmed_id)  # Print article Id for Debugging
+    for id, article in enumerate(data):  # id 는 enumerate 를 통해 생성 0부터 시작하는 인덱스 값, article 은 data에 저장된 각 논문
+        print("Found : " + article.pubmed_id)  # 정상 작동 여부를 확인하기 위한 아이디 노출.
 
-        url = "https://www.ncbi.nlm.nih.gov/pubmed/" + article.pubmed_id
+        url = "https://www.ncbi.nlm.nih.gov/pubmed/" + article.pubmed_id # 해당 논문의 URL 값 처리
 
-        if article.journalissue["PubDate_Year"] is None:
+        if article.journalissue["PubDate_Year"] is None: # 저널의 연도 정보를 체크하여 없으면 공백으로 표시함.
             journalyear = ""
         else:
             journalyear = article.journalissue["PubDate_Year"]
 
-        lst = [article.journalissue["ISOName"] + " " + journalyear, article.title, article.abstract,
-               url]  # ArticleID - Title - Abstract - Article URL
-        sheet.append(lst)  # Add to worksheet
-        sheet['D' + str(id + 2)].hyperlink = url
-        for col in ["A", "B", "C", "D"]:  # Enable Multi line all column.
-            sheet[col + str(id + 2)].alignment = Alignment(wrapText=True, vertical='center')
+        lst = [article.journalissue["ISOName"] + " " + journalyear, article.title, article.abstract, url]  # 저널명 - 제목 - Abstract - 주소 순으로 정렬함.
+        sheet.append(lst)  # 엑셀 워크시트에 위 정렬된 것을 마지막 줄에 추가.
+        sheet['D' + str(id + 2)].hyperlink = url # URL 셀 하이퍼링크 처리.
+        for col in ["A", "B", "C", "D"]:  # A 컬럼부터 D 컬럼까지 정렬를 설정함
+           sheet[col + str(id + 2)].alignment = Alignment(wrapText=True, vertical='center')
 
-    table = Table(displayName="Data", ref="A1:D" + str(len(data) + 1))  # Make as Table
+    table = Table(displayName="Data", ref="A1:D" + str(len(data) + 1))  # 리스트를 테이블화 함
     style = TableStyleInfo(name="TableStyleLight9", showFirstColumn=False,
-                           showLastColumn=False, showRowStripes=True, showColumnStripes=True)  # Add Style to Table
-    table.tableStyleInfo = style
-    sheet.add_table(table)  # Apply Table to Worksheet
-    sheet.column_dimensions["A"].width = 15.0  # 15px for Journal
-    sheet.column_dimensions["B"].width = 100.0  # 100px for Title
-    sheet.column_dimensions["C"].width = 150.0  # 150px for Abstract
-    sheet.column_dimensions["D"].width = 40.0  # 40px for URL
+                           showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+    table.tableStyleInfo = style # 테이블에 스타일을 적용함
+    sheet.add_table(table)  # 워크시트에 테이블을 적용함
+    sheet.column_dimensions["A"].width = 15.0  # 저널 컬럼 크기 15px
+    sheet.column_dimensions["B"].width = 100.0  # 제목 컬럼 크기 100px
+    sheet.column_dimensions["C"].width = 150.0  # Abstract 컬럼 크기 150px
+    sheet.column_dimensions["D"].width = 40.0  # URL 컬럼 크기 40px
 
-    now = datetime.now().strftime("%m-%d-%Y, %H-%M-%S")  # Current DateTime
-    wb.save(now + ".xlsx")  # Save File with current datetime
+    now = datetime.now().strftime("%m-%d-%Y, %H-%M-%S")  # 현재 일자 시간
+    wb.save(now + ".xlsx")  # 현재의 일자 시간을 파일명에 사용
     file = now + ".xlsx"
-    if sys.platform.startswith('win'):  # If run on Microsoft Windows
-        os.startfile(file)  # Start Excel File. (Windows will launch default spreadsheet application)
-    return now  # Return filename
+    if sys.platform.startswith('win'):  # 윈도우에서 실행 시
+        os.startfile(file)  # 엑셀 파일 실행 (윈도우가 기본 스프레드시트 프로그램을 통해 실행함)
+    return now  # 파일 이름을 최종 반환.
 
 
-if getattr(sys, 'frozen', False):
+if getattr(sys, 'frozen', False): # EXE 파일 실행 시
     template_folder = os.path.join(sys._MEIPASS, 'templates')
     static_folder = os.path.join(sys._MEIPASS, 'static')
     app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
-else:
+else: # 스크립트 파일로 실행
     app = Flask(__name__)
 
-store = list()  # Search result will save here.
+store = list()  # 검색 결과가 여기에 저장됨.
 
 
-@app.route("/", methods=["GET", "POST"])  # Homepage
+@app.route("/", methods=["GET", "POST"])  # 첫 화면.
 def root():
-    global store  # Will use global variable, defined above.
-    if request.method == 'POST':  # If is request from Form.
+    global store  # 위에서 만든 store 를 사용
+    if request.method == 'POST':  # 검색 버튼으로 요청했을 경우.
         pubmed = PubMed(tool="MyTool", email="my@email.address")
-        if (not "query" in request.form) or request.form["query"] == "":  # If Search Query is empty or not exist
+        if (not "query" in request.form) or request.form["query"] == "":  # 쿼리문을 받지 못했을 경우.
             return render_template("index.html", err="You must fill query input field.")
-        query = request.form["query"]  # Get querty from request parameters.
+        query = request.form["query"]  # 페이지의 쿼리문 입력 공간 = query.
 
-        # Execute the query against the API
-        results = pubmed.query(query, max_results=100)  # Max Result as 100
-        store = list(results)  # Save result to global variable for further use.
+        results = pubmed.query(query, max_results=100)  # 최대 결과 개수를 100개로 제한하고 쿼리문으로 검색함. (여기 수정 시 밑에도 수정해야 함.)
+        store = list(results)  # 받은 값을 배열화하고 바깥 store 에 저장함
 
-        if len(store) == 100:
+        if len(store) == 100: # 데이터의 개수가 100개 인 경우 검색 결과가 잘렸음을 알림
             resultMessage = "검색 결과가 많아 100개로 제한하였습니다. 검색어를 구체화하세요."
         else:
             resultMessage = str(len(store)) + "개를 찾았습니다."
 
         return render_template('index.html', data=store, resultMsg=resultMessage)
-    else:
+    else: # 접속 시.
         return render_template('index.html')
 
 
-@app.route("/open", methods=["POST", "GET"])  # Export to Spreadsheet from selected article.
+@app.route("/open", methods=["POST", "GET"])  # 선택된 논문을 처리합니다.
 def open():
     global store
     if request.method == "POST":
-        if (not "selected" in request.form) or request.form[
-            "selected"] == "":  # If Selected article is empty or not exist
+        if (not "selected" in request.form) or request.form["selected"] == "":  # 선택된 논문이 없을경우.
             return render_template("index.html", err="You must fill query input field.")
 
         lists = []
 
         for item in request.form.getlist("selected"):
-            lists.append(store[int(item)])  # Each selected item add to lists
+            lists.append(store[int(item)])  # 선택된 논문을 배열에 집어넣습니다.
 
         filename = createWorksheet(lists)
-        if filename:  # If Filename returned, Add Message that is created.
+        if filename:  # 파일명을 받은 경우 파일명과 함께 메세지를 표출합니다.
             return render_template("index.html", msg=filename + ".xlsx is created.")
     else:
         return redirect(url_for('root'))
@@ -151,8 +148,8 @@ def terminate():
 @app.after_request
 def add_header(r):
     """
-    Add headers to both force latest IE rendering engine or Chrome Frame,
-    and also to cache the rendered page for 10 minutes.
+    HTML, CSS, Javascript 파일이 브라우저 캐시에 의해 최신 변경점이 반영되지 않는 문제점이 있습니다.
+    브라우저에 캐시를 사용하지 말 것을 보냅니다.
     """
     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     r.headers["Pragma"] = "no-cache"
@@ -162,7 +159,7 @@ def add_header(r):
 
 if __name__ == "__main__":
     if sys.platform.startswith('win'):
-        # On Windows calling this function is necessary.
+        # 윈도우에서의 오류 제거
         multiprocessing.freeze_support()
 
     webbrowser.open("http://127.0.0.1:8484/", autoraise=True)  # Open Web browser to Local Server
