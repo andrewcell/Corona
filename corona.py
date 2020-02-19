@@ -106,7 +106,7 @@ def root():
     if request.method == 'POST':  # 검색 버튼으로 요청했을 경우.
         pubmed = PubMed(tool="MyTool", email="my@email.address")
         if (not "query" in request.form) or request.form["query"] == "":  # 쿼리문을 받지 못했을 경우.
-            return render_template("index.html", err="You must fill query input field.")
+            return render_template("index.html", err="필수 입력 값이 입력되지 않았습니다.")
         query = request.form["query"]  # 페이지의 쿼리문 입력 공간 = query.
 
         results = pubmed.query(query, max_results=100)  # 최대 결과 개수를 100개로 제한하고 쿼리문으로 검색함. (여기 수정 시 밑에도 수정해야 함.)
@@ -127,7 +127,7 @@ def open():
     global store
     if request.method == "POST":
         if (not "selected" in request.form) or request.form["selected"] == "":  # 선택된 논문이 없을경우.
-            return render_template("index.html", err="You must fill query input field.")
+            return render_template("index.html", err="선택된 논문이 없습니다.")
 
         lists = []
 
@@ -136,7 +136,7 @@ def open():
 
         filename = createWorksheet(lists)
         if filename:  # 파일명을 받은 경우 파일명과 함께 메세지를 표출합니다.
-            return render_template("index.html", msg=filename + ".xlsx is created.")
+            return render_template("index.html", msg=filename + ".xlsx 파일이 생성되었습니다.")
     else:
         return redirect(url_for('root'))
 
