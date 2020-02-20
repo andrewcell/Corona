@@ -54,40 +54,60 @@ def createWorksheet(data):
     # }
     wb = Workbook()
     sheet = wb.active
-    sheet.append(["Journal", "Title", "Abstract", "URL"])  # 테이블의 컬럼명을 첫 줄에 입력.
+
+    columns = {
+        "A": {
+            "title": "Journal",
+            "width": 15.0
+        },
+        "B": {
+            "title": "Title",
+            "width": 100.0
+        },
+        "C": {
+            "title": "Abstract",
+            "width": 150.0
+        },
+        "D": {
+            "title": "URL",
+            "width": 40.0
+        }
+    }
+
+    sheet.append([""])
 
     for id, article in enumerate(data):  # id 는 enumerate 를 통해 생성 0부터 시작하는 인덱스 값, article 은 data에 저장된 각 논문
         print("Found : " + article.pubmed_id)  # 정상 작동 여부를 확인하기 위한 아이디 노출.
 
         url = "https://www.ncbi.nlm.nih.gov/pubmed/" + article.pubmed_id # 해당 논문의 URL 값 처리
+        journal_year = article.journalissue["PubDate_Year"]
+        journal_year =  "" if journal_year is None else journal_year  # 저널의 연도 정보를 체크하여 없으면 공백으로 표시함.
+        journal = article.journalissue["ISOName"] + " " + journal_year
 
-        if article.journalissue["PubDate_Year"] is None: # 저널의 연도 정보를 체크하여 없으면 공백으로 표시함.
-            journalyear = ""
-        else:
-            journalyear = article.journalissue["PubDate_Year"]
+        lst = [journal, article.title, article.abstract, url]  # 저널명 - 제목 - Abstract - 주소 순으로 정렬함.
 
-        lst = [article.journalissue["ISOName"] + " " + journalyear, article.title, article.abstract, url]  # 저널명 - 제목 - Abstract - 주소 순으로 정렬함.
         sheet.append(lst)  # 엑셀 워크시트에 위 정렬된 것을 마지막 줄에 추가.
         sheet['D' + str(id + 2)].hyperlink = url # URL 셀 하이퍼링크 처리.
-        for col in ["A", "B", "C", "D"]:  # A 컬럼부터 D 컬럼까지 정렬를 설정함
-           sheet[col + str(id + 2)].alignment = Alignment(wrapText=True, vertical='center')
+
+    for columnLetter, column in columns.items():  # 각 열의 가로 길이를 설정하고 스타일을 설정함.
+        sheet[columnLetter + "1"] = column["title"] # 첫번째 열에 컬럼의 이름을 입력합니다.
+        sheet.column_dimensions[columnLetter].width = column["width"]
+        for index in range(len(data) + 2): # 컬럼 자체를 스타일 설정이 불가능하여 논문(데이터)의 개수를 세어 개수+1만큼의 행마다 스타일을 설정합니다.
+            sheet[columnLetter + str(index + 1)].alignment = Alignment(wrapText=True, vertical='center')
 
     table = Table(displayName="Data", ref="A1:D" + str(len(data) + 1))  # 리스트를 테이블화 함
     style = TableStyleInfo(name="TableStyleLight9", showFirstColumn=False,
                            showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+
     table.tableStyleInfo = style # 테이블에 스타일을 적용함
     sheet.add_table(table)  # 워크시트에 테이블을 적용함
-    sheet.column_dimensions["A"].width = 15.0  # 저널 컬럼 크기 15px
-    sheet.column_dimensions["B"].width = 100.0  # 제목 컬럼 크기 100px
-    sheet.column_dimensions["C"].width = 150.0  # Abstract 컬럼 크기 150px
-    sheet.column_dimensions["D"].width = 40.0  # URL 컬럼 크기 40px
 
-    now = datetime.now().strftime("%m-%d-%Y, %H-%M-%S")  # 현재 일자 시간
-    wb.save(now + ".xlsx")  # 현재의 일자 시간을 파일명에 사용
-    file = now + ".xlsx"
+    filename = datetime.now().strftime("%m-%d-%Y, %H-%M-%S") + ".xlsx" # 현재 일자 시간
+    wb.save(filename)  # 현재의 일자 시간을 파일명에 사용
+
     if sys.platform.startswith('win'):  # 윈도우에서 실행 시
-        os.startfile(file)  # 엑셀 파일 실행 (윈도우가 기본 스프레드시트 프로그램을 통해 실행함)
-    return now  # 파일 이름을 최종 반환.
+        os.startfile(filename)  # 엑셀 파일 실행 (윈도우가 기본 스프레드시트 프로그램을 통해 실행함)
+    return filename  # 파일 이름을 최종 반환.
 
 
 if getattr(sys, 'frozen', False): # EXE 파일 실행 시
@@ -136,7 +156,7 @@ def open():
 
         filename = createWorksheet(lists)
         if filename:  # 파일명을 받은 경우 파일명과 함께 메세지를 표출합니다.
-            return render_template("index.html", msg=filename + ".xlsx 파일이 생성되었습니다.")
+            return render_template("index.html", msg=filename + " 파일이 생성되었습니다.")
     else:
         return redirect(url_for('root'))
 
