@@ -8,11 +8,12 @@ import os
 import sys
 import multiprocessing
 import webbrowser
-from openpyxl.styles import Alignment
+
 from pymed import PubMed
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
 from openpyxl import Workbook
+from openpyxl.styles import Alignment
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 
