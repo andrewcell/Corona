@@ -125,8 +125,10 @@ def root():
     global store  # 위에서 만든 store 를 사용
     if request.method == 'POST':  # 검색 버튼으로 요청했을 경우.
         pubmed = PubMed(tool="MyTool", email="my@email.address")
+
         if (not "query" in request.form) or request.form["query"] == "":  # 쿼리문을 받지 못했을 경우.
             return render_template("index.html", err="필수 입력 값이 입력되지 않았습니다.")
+
         query = request.form["query"]  # 페이지의 쿼리문 입력 공간 = query.
 
         results = pubmed.query(query, max_results=100)  # 최대 결과 개수를 100개로 제한하고 쿼리문으로 검색함. (여기 수정 시 밑에도 수정해야 함.)

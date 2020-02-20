@@ -3,6 +3,7 @@
 {% block content %}
     <div class="container-fluid">
         <script src="/static/index.js"></script>
+        <!--<button type="button" id="config" class="btn btn-outline-secondary"  data-toggle="modal" data-target="#configModal">설정</button>-->
         {% if err %}
             <div class="alert alert-danger" role="alert">{{err}}</div>
         {% endif %}
@@ -39,6 +40,25 @@
             </form>
         </div>
         &nbsp;
+        <div class="modal fade" id="configModal" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">설정</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>설정 항목</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary">설정 저장</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+              </div>
+            </div>
+          </div>
+        </div>
         {% if data %}
             <form action="/open", method="post">
                 {% if resultMsg %}
