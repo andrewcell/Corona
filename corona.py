@@ -8,6 +8,8 @@ import os
 import sys
 import multiprocessing
 import webbrowser
+import requests
+import json
 
 from pymed import PubMed
 from datetime import datetime
@@ -111,6 +113,14 @@ def createWorksheet(data):
     return filename  # 파일 이름을 최종 반환.
 
 
+def getversion():
+    try:
+        latest = json.loads(requests.get("https://api.github.com/repos/andrewcell/Corona/releases").text)[0]
+        asset = latest["assets"][0]
+        return [latest["name"], latest["published_at"], asset["browser_download_url"]]
+    except:
+        return None
+
 if getattr(sys, 'frozen', False): # EXE 파일 실행 시
     template_folder = os.path.join(sys._MEIPASS, 'templates')
     static_folder = os.path.join(sys._MEIPASS, 'static')
@@ -142,7 +152,9 @@ def root():
 
         return render_template('index.html', data=store, resultMsg=resultMessage)
     else: # 접속 시.
-        return render_template('index.html')
+        version = getversion()
+        print(version)
+        return render_template('index.html', version=version)
 
 
 @app.route("/open", methods=["POST", "GET"])  # 선택된 논문을 처리합니다.

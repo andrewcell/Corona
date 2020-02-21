@@ -3,6 +3,9 @@
 {% block content %}
     <div class="container-fluid">
         <script src="/static/index.js"></script>
+        {% if version %}
+            <p style="font-size: 8px; position: absolute">최신 버전 : {{ version[0] }} - <script>document.write(moment("{{ version[1] }}").format("YYYY-MM-DD hh:mm"))</script>, <a href="{{ version[2] }}">다운로드</a></p>
+        {% endif %}
         <!--<button type="button" id="config" class="btn btn-outline-secondary"  data-toggle="modal" data-target="#configModal">설정</button>-->
         {% if err %}
             <div class="alert alert-danger" role="alert">{{err}}</div>
