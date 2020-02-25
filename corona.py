@@ -1,9 +1,11 @@
-#
-# Corona
-# Author: Andrew M. Bray (Seungyeon Choi)
-# Repository: https://github.com/andrewcell/Corona
-# pymed : https://github.com/gijswobben/pymed
-#
+"""
+ Corona
+ Author: Andrew M. Bray (Seungyeon Choi)
+ Author E-mail: lisa.su@kakao.com
+ Repository: https://github.com/andrewcell/Corona
+ pymed : https://github.com/gijswobben/pymed
+
+"""
 import os
 import sys
 import multiprocessing

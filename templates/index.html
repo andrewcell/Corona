@@ -85,7 +85,11 @@
                     <tr>
                         <td>{{loop.index}}</td>
                         <th scope="row"><input type="checkbox" name="selected" value={{loop.index-1}} checked /></th>
-                        <td>{{article.journalissue["ISOName"] + " " + article.journalissue["PubDate_Year"] ~ ""}}</td>
+                        {% if article.journalissue %}
+                            <td>{{article.journalissue["ISOName"] + " " + article.journalissue["PubDate_Year"] ~ ""}}</td>
+                        {% else %}
+                            <td></td>-
+                        {% endif %}
                         <td width="12%">{{article.title}}</td>
                         <td>{{article.abstract}}</td>
                     </tr>
