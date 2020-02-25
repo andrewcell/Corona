@@ -84,30 +84,44 @@ def createWorksheet(data):
     for id, article in enumerate(data):  # id 는 enumerate 를 통해 생성 0부터 시작하는 인덱스 값, article 은 data에 저장된 각 논문
         print("Found : " + article.pubmed_id)  # 정상 작동 여부를 확인하기 위한 아이디 노출.
 
-        url = "https://www.ncbi.nlm.nih.gov/pubmed/" + article.pubmed_id # 해당 논문의 URL 값 처리
-        journal_year = article.journalissue["PubDate_Year"]
-        journal_year =  "" if journal_year is None else journal_year  # 저널의 연도 정보를 체크하여 없으면 공백으로 표시함.
-        journal = article.journalissue["ISOName"] + " " + journal_year
+        url = "https://www.ncbi.nlm.nih.gov/pubmed/" + article.pubmed_id  # 해당 논문의 URL 값 처리
+
+        if hasattr(article, "journalissue"):  # 저널의 연도 정보를 체크하여 없으면 공백으로 표시함.
+            if "ISOName" in article.journalissue:
+                if article.journalissue["ISOName"] is not None:
+                    ISOName = article.journalissue["ISOName"]
+            else:
+                ISOName = ""
+            if "PubDate_Year" in article.journalissue:
+                if article.journalissue["PubDate_Year"] is not None:
+                    journal_year = article.journalissue["PubDate_Year"]
+            else:
+                journal_year = ""
+        else:
+            journal_year = ""
+            ISOName = ""
+
+        journal = ISOName + " " + journal_year
 
         lst = [journal, article.title, article.abstract, url]  # 저널명 - 제목 - Abstract - 주소 순으로 정렬함.
 
         sheet.append(lst)  # 엑셀 워크시트에 위 정렬된 것을 마지막 줄에 추가.
-        sheet['D' + str(id + 2)].hyperlink = url # URL 셀 하이퍼링크 처리.
+        sheet['D' + str(id + 2)].hyperlink = url  # URL 셀 하이퍼링크 처리.
 
     for columnLetter, column in columns.items():  # 각 열의 가로 길이를 설정하고 스타일을 설정함.
-        sheet[columnLetter + "1"] = column["title"] # 첫번째 열에 컬럼의 이름을 입력합니다.
+        sheet[columnLetter + "1"] = column["title"]  # 첫번째 열에 컬럼의 이름을 입력합니다.
         sheet.column_dimensions[columnLetter].width = column["width"]
-        for index in range(len(data) + 2): # 컬럼 자체를 스타일 설정이 불가능하여 논문(데이터)의 개수를 세어 개수+1만큼의 행마다 스타일을 설정합니다.
+        for index in range(len(data) + 2):  # 컬럼 자체를 스타일 설정이 불가능하여 논문(데이터)의 개수를 세어 개수+1만큼의 행마다 스타일을 설정합니다.
             sheet[columnLetter + str(index + 1)].alignment = Alignment(wrapText=True, vertical='center')
 
     table = Table(displayName="Data", ref="A1:D" + str(len(data) + 1))  # 리스트를 테이블화 함
     style = TableStyleInfo(name="TableStyleLight9", showFirstColumn=False,
                            showLastColumn=False, showRowStripes=True, showColumnStripes=True)
 
-    table.tableStyleInfo = style # 테이블에 스타일을 적용함
+    table.tableStyleInfo = style  # 테이블에 스타일을 적용함
     sheet.add_table(table)  # 워크시트에 테이블을 적용함
 
-    filename = datetime.now().strftime("%m-%d-%Y, %H-%M-%S") + ".xlsx" # 현재 일자 시간
+    filename = datetime.now().strftime("%m-%d-%Y, %H-%M-%S") + ".xlsx"  # 현재 일자 시간
     wb.save(filename)  # 현재의 일자 시간을 파일명에 사용
 
     if sys.platform.startswith('win'):  # 윈도우에서 실행 시
@@ -123,11 +137,12 @@ def getversion():
     except:
         return None
 
-if getattr(sys, 'frozen', False): # EXE 파일 실행 시
+
+if getattr(sys, 'frozen', False):  # EXE 파일 실행 시
     template_folder = os.path.join(sys._MEIPASS, 'templates')
     static_folder = os.path.join(sys._MEIPASS, 'static')
     app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
-else: # 스크립트 파일로 실행
+else:  # 스크립트 파일로 실행
     app = Flask(__name__)
 
 store = list()  # 검색 결과가 여기에 저장됨.
@@ -147,13 +162,13 @@ def root():
         results = pubmed.query(query, max_results=100)  # 최대 결과 개수를 100개로 제한하고 쿼리문으로 검색함. (여기 수정 시 밑에도 수정해야 함.)
         store = list(results)  # 받은 값을 배열화하고 바깥 store 에 저장함
 
-        if len(store) == 100: # 데이터의 개수가 100개 인 경우 검색 결과가 잘렸음을 알림
+        if len(store) == 100:  # 데이터의 개수가 100개 인 경우 검색 결과가 잘렸음을 알림
             resultMessage = "검색 결과가 많아 100개로 제한하였습니다. 검색어를 구체화하세요."
         else:
             resultMessage = str(len(store)) + "개를 찾았습니다."
 
         return render_template('index.html', data=store, resultMsg=resultMessage)
-    else: # 접속 시.
+    else:  # 접속 시.
         version = getversion()
         print(version)
         return render_template('index.html', version=version)
@@ -182,6 +197,7 @@ def open():
 def terminate():
     os._exit(0)
 
+
 @app.after_request
 def add_header(r):
     """
@@ -193,6 +209,7 @@ def add_header(r):
     r.headers["Expires"] = "0"
     r.headers['Cache-Control'] = 'public, max-age=0'
     return r
+
 
 if __name__ == "__main__":
     if sys.platform.startswith('win'):
