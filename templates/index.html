@@ -39,6 +39,7 @@
                 </div>
                 <input type="button" id="add" class="btn btn-danger" value="Add" />
                 <input type="button" id="search" class="btn btn-primary" value="Search" />
+                <input type="button" id="settings" class="btn btn-secondary" value="Settings" />
                 <a href="/terminate" type="button" id="terminate" class="btn btn-warning" value="">Terminate Program</a>
             </form>
         </div>
@@ -53,10 +54,22 @@
                 </button>
               </div>
               <div class="modal-body">
-                <p>설정 항목</p>
+                  <form id="configForm">
+                      <div class="form-group">
+                          <label for="resultLimit">검색 결과 수를 다음 수까지 제한합니다.</label>
+                          <input class="form-control" type="number" id="resultLimit" name="resultLimit" value="100" />
+                      </div>
+                      <div class="form-group">
+                          <label for="titleColor">검색한 키워드를 다음 색으로 강조합니다.</label>
+                          <input class="form-control" type="color" id="titleColor" name="titleColor" value="#ff0000">
+                      </div>
+                      <div class="form-group">
+                          <label for="sentColor">검색한 키워드가 포함된 문장을 다음 색으로 강조합니다.</label>
+                          <input class="form-control" type="color" id="sentColor" name="sentColor" value="#ffff00">
+                      </div>
+                  </form>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-primary">설정 저장</button>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
               </div>
             </div>
@@ -86,9 +99,12 @@
                         <td>{{loop.index}}</td>
                         <th scope="row"><input type="checkbox" name="selected" value={{loop.index-1}} checked /></th>
                         {% if article.journalissue %}
-                            <td>{{article.journalissue["ISOName"] + " " + article.journalissue["PubDate_Year"] ~ ""}}</td>
+                            <td>
+                                {{article.journalissue["ISOName"] if article.journalissue["ISOName"] + " "}}
+                                {{ article.journalissue["PubDate_Year"] if article.journalissue["PubDate_Year"] ~ "" }}
+                            </td>
                         {% else %}
-                            <td></td>-
+                            <td></td>
                         {% endif %}
                         <td width="12%">{{article.title}}</td>
                         <td>{{article.abstract}}</td>

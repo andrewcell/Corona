@@ -105,12 +105,30 @@ $(document).ready(function() {
 
     $("#search").click(function() {
         $("form#queryForm").submit();
-    })
+    });
+
+    $("#settings").click(function() {
+        $("#configModal").modal('toggle');
+    });
+
     $(document).on('change', 'input', function(event) {
         if(event.target.id === "query") {
             return;
         }
-        generateQuery()
+
+        if(event.target.id === "resultLimit" || event.target.id === "titleColor" || event.target.id === "sentColor") {
+            $(".modal-body > .alert").remove();
+            $.ajax({
+                type: "POST",
+                url: "/saveconfig",
+                data: $("#configForm").serialize(),
+                error: function() {
+                    $(".modal-body").prepend("<div class='alert alert-danger'>오류로 인해 설정이 반영되지 않았습니다.</div>");
+                }
+            });
+        } else {
+            generateQuery()
+        }
     });
 
     $(document).on('change', 'select', function() {

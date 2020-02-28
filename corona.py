@@ -15,7 +15,7 @@ import json
 
 from pymed import PubMed
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
 from openpyxl import Workbook
 from openpyxl.styles import Alignment
 from openpyxl.worksheet.table import Table, TableStyleInfo
@@ -146,11 +146,14 @@ else:  # 스크립트 파일로 실행
     app = Flask(__name__)
 
 store = list()  # 검색 결과가 여기에 저장됨.
+resultLimit = 100 # 최대 결과 수
+keywordHighlightColor = "#ff0000" # 검색한 키워드 강조 색상
+sentenceHighlightColor = "#ffff00" # 키워드 포함 문장 강조 색상
 
 
 @app.route("/", methods=["GET", "POST"])  # 첫 화면.
 def root():
-    global store  # 위에서 만든 store 를 사용
+    global store, resultLimit, keywordHighlightColor, sentenceHighlightColor  # 위에서 만든 변수들을 사용
     if request.method == 'POST':  # 검색 버튼으로 요청했을 경우.
         pubmed = PubMed(tool="MyTool", email="my@email.address")
 
@@ -159,11 +162,11 @@ def root():
 
         query = request.form["query"]  # 페이지의 쿼리문 입력 공간 = query.
 
-        results = pubmed.query(query, max_results=100)  # 최대 결과 개수를 100개로 제한하고 쿼리문으로 검색함. (여기 수정 시 밑에도 수정해야 함.)
+        results = pubmed.query(query, max_results=int(resultLimit))  # 최대 결과 개수를 resultLimit개로 제한하고 쿼리문으로 검색함.
         store = list(results)  # 받은 값을 배열화하고 바깥 store 에 저장함
 
-        if len(store) == 100:  # 데이터의 개수가 100개 인 경우 검색 결과가 잘렸음을 알림
-            resultMessage = "검색 결과가 많아 100개로 제한하였습니다. 검색어를 구체화하세요."
+        if len(store) == int(resultLimit):  # 데이터의 개수가 resultLimit개 인 경우 검색 결과가 잘렸음을 알림
+            resultMessage = "검색 결과가 많아 " + str(resultLimit) + "개로 제한하였습니다. 검색어를 구체화하세요."
         else:
             resultMessage = str(len(store)) + "개를 찾았습니다."
 
@@ -176,7 +179,7 @@ def root():
 
 @app.route("/open", methods=["POST", "GET"])  # 선택된 논문을 처리합니다.
 def open():
-    global store
+    global store, keywordHighlightColor, sentenceHighlightColor
     if request.method == "POST":
         if (not "selected" in request.form) or request.form["selected"] == "":  # 선택된 논문이 없을경우.
             return render_template("index.html", err="선택된 논문이 없습니다.")
@@ -196,6 +199,24 @@ def open():
 @app.route("/terminate", methods=["GET"])
 def terminate():
     os._exit(0)
+
+
+@app.route("/saveconfig", methods=["POST"]) # 설정을 저장합니다
+def saveConfig():
+    global resultLimit, keywordHighlightColor, sentenceHighlightColor
+    if request.method == "POST":
+        form = request.form
+        if request.form is None or (not "resultLimit" in form) or (not "titleColor" in form) or (not "sentColor" in form):
+            return Response(status=400)
+        try:
+            resultLimit = form["resultLimit"]
+            keywordHighlightColor = form["titleColor"]
+            sentenceHighlightColor = form["sentColor"]
+        except:
+            return Response(status=400)
+        finally:
+            return jsonify({'comment': 'success'})
+
 
 
 @app.after_request
