@@ -13,6 +13,7 @@ import webbrowser
 import requests
 import json
 import re
+import nltk
 import xlsxwriter
 
 from pymed import PubMed
@@ -20,6 +21,9 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
 from nltk import tokenize, word_tokenize, sent_tokenize, download
 from nltk.tokenize.treebank import TreebankWordDetokenizer
+
+path = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+nltk.data.path.append(path + "/nltk_data")
 
 
 # 엑셀 파일 생성.
@@ -304,6 +308,5 @@ if __name__ == "__main__":
     if sys.platform.startswith('win'):
         # 윈도우에서의 오류 제거
         multiprocessing.freeze_support()
-    download("punkt")
     webbrowser.open("http://127.0.0.1:8484/", autoraise=True)  # Open Web browser to Local Server
     app.run(port=8484)
