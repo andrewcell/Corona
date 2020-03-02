@@ -13,6 +13,7 @@ jobs:
         - pip3 install setuptools
         - powershell -command 'copy-item nltk_data c:\users\travis'
         - powershell -command 'copy-item nltk_data c:\python37'
+        - powershell -command 'copy-item hook_nltk.py c:\python37\Lib\site-packages\PyInstaller\hooks -force'
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH; OUTPUT=corona-windows.exe; TAG=$(git log --format=%h -1)
 # command to install dependencies
 install:
