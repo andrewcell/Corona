@@ -61,11 +61,11 @@
                       </div>
                       <div class="form-group">
                           <label for="titleColor">검색한 키워드를 다음 색으로 강조합니다.</label>
-                          <input class="form-control" type="color" id="titleColor" name="titleColor" value="#ff0000">
+                          <input class="form-control" type="color" id="titleColor" name="titleColor" value="">
                       </div>
                       <div class="form-group">
                           <label for="sentColor">검색한 키워드가 포함된 문장을 다음 색으로 강조합니다.</label>
-                          <input class="form-control" type="color" id="sentColor" name="sentColor" value="#ffff00">
+                          <input class="form-control" type="color" id="sentColor" name="sentColor" value="">
                       </div>
                   </form>
               </div>
@@ -76,44 +76,4 @@
           </div>
         </div>
     </div>
-    {% if data %}
-        <form action="/open", method="post">
-            {% if resultMsg %}
-                <div class="container-fluid">
-                    <div class="alert alert-success" role="alert">{{resultMsg}}</div>
-                </div>
-            {% endif %}
-            <table class="table">
-              <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Include</th>
-                    <th scope="col">Journal</th>
-                    <th scope="col">Title</th>
-                    <th scope="col">Abstract</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for article in data %}
-                    <tr>
-                        <td>{{loop.index}}</td>
-                        <th scope="row"><input type="checkbox" name="selected" value={{loop.index-1}} checked /></th>
-                        {% if article.journalissue %}
-                            <td>
-                                {{article.journalissue["ISOName"] if article.journalissue["ISOName"] + " "}}
-                                {{ article.journalissue["PubDate_Year"] if article.journalissue["PubDate_Year"] ~ "" }}
-                            </td>
-                        {% else %}
-                            <td></td>
-                        {% endif %}
-                        <td width="12%">{{article.title}}</td>
-                        <td>{{article.abstract}}</td>
-                    </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-
-            <button class="btn btn-success">Submit</button>
-        </form>
-    {% endif %}
 {% endblock %}

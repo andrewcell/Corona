@@ -10,3 +10,11 @@ body {
     font-size: 8px;
     position: absolute;
 }
+
+html body div.container-fluid form table.table tbody tr td div div {
+    display: inline;
+}
+
+html body div.container-fluid form table.table tbody tr td div {
+    display: inline;
+}

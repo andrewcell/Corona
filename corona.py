@@ -12,53 +12,21 @@ import multiprocessing
 import webbrowser
 import requests
 import json
+import re
+import xlsxwriter
 
 from pymed import PubMed
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, Response, jsonify
-from openpyxl import Workbook
-from openpyxl.styles import Alignment
-from openpyxl.worksheet.table import Table, TableStyleInfo
+from nltk import tokenize, word_tokenize, sent_tokenize, download
+from nltk.tokenize.treebank import TreebankWordDetokenizer
 
 
-# 엑셀 파일 생
+# 엑셀 파일 생성.
 def createWorksheet(data):
-    # { Example Data
-    #    "abstract": "Cancer remains a leading cause of death, despite multimodal treatment approaches. Even in patients with a healthy immune response, cancer cells can escape the immune system during tumorigenesis. Cancer cells incapacitate the normal cell-mediated immune system by expressing immune modulation ligands such as programmed death (PD) ligand 1, the B7 molecule, or secreting activators of immune modulators. Chimeric antigen receptor (CAR) T cells were originally designed to target cancer cells. Engineered approaches allow CAR T cells, which possess a simplified yet specific receptor, to be easily activated in limited situations. CAR T cell treatment is a derivative of the antigen-antibody reaction and can be applied to various diseases. In this review, the current successes of CAR T cells in cancer treatment and the therapeutic potential of CAR T cells are discussed.",
-    #    "authors": [
-    #        {
-    #            "affiliation": "Department of Pharmacology, Chonnam National University Medical School, Hwasun, Korea.",
-    #            "firstname": "Somy",
-    #            "initials": "S",
-    #            "lastname": "Yoon"
-    #        },
-    #        {
-    #            "affiliation": "Department of Pharmacology, Chonnam National University Medical School, Hwasun, Korea.",
-    #            "firstname": "Gwang Hyeon",
-    #            "initials": "GH",
-    #           "lastname": "Eom"
-    #       }
-    #    ],
-    #    "conclusions": null,
-    #    "copyrights": "\u00a9 Chonnam Medical Journal, 2020.",
-    #    "doi": "10.4068/cmj.2020.56.1.6",
-    #    "journal": "Chonnam medical journal",
-    #    "keywords": [
-    #        "CAR T cell",
-    #        "Combined Modality Therapy",
-    #        "Ligands",
-    #        "Neoplasms",
-    #        "T-Lymphocytes"
-    #    ],
-    #    "methods": null,
-    #    "publication_date": "2020-02-06",
-    #    "pubmed_id": "32021836\n17344846\n16417215\n25893595\n28799485\n11403834\n31019670\n29742380\n25510272\n28726836\n21994741\n26663085\n19459844\n30592986\n26568292\n30082599\n29385370\n28983798\n18034592\n25765070\n10585967\n31511695\n21293511\n28857075\n29855723\n23636127\n27785449\n25999455\n30261221\n19132916\n19636327\n27365313\n31723827\n28936279\n22129804\n29686425\n27626062\n30747012\n29389859\n25440610\n28652918\n29025771\n18986838\n28555670\n29667553\n28292435\n11585784\n24076584\n24432303\n25501578\n29226797\n18541331\n27207799\n18481901\n23546520\n30036350",
-    #    "results": null,
-    #    "title": "Chimeric Antigen Receptor T Cell Therapy: A Novel Modality for Immune Modulation.",
-    #    "xml": "<Element 'PubmedArticle' at 0x106847f50>"
-    # }
-    wb = Workbook()
-    sheet = wb.active
+    filename = datetime.now().strftime("%m-%d-%Y, %H-%M-%S") + ".xlsx"  # 현재 일자 시간
+    wb = xlsxwriter.Workbook(filename)  # 현재의 일자 시간을 파일명에 사용
+    sheet = wb.add_worksheet()
 
     columns = {
         "A": {
@@ -79,7 +47,9 @@ def createWorksheet(data):
         }
     }
 
-    sheet.append([""])
+    keywordStyle = wb.add_format({'color': keywordHighlightColor})
+    sentenceStyle = wb.add_format({'color': sentenceHighlightColor})
+    cellformat = wb.add_format({'align': 'vcenter', 'text_wrap': True})
 
     for id, article in enumerate(data):  # id 는 enumerate 를 통해 생성 0부터 시작하는 인덱스 값, article 은 data에 저장된 각 논문
         print("Found : " + article.pubmed_id)  # 정상 작동 여부를 확인하기 위한 아이디 노출.
@@ -103,27 +73,41 @@ def createWorksheet(data):
 
         journal = ISOName + " " + journal_year
 
-        lst = [journal, article.title, article.abstract, url]  # 저널명 - 제목 - Abstract - 주소 순으로 정렬함.
+        newAbstract = list()
+        for sentence in article.abstract:
+            if type(sentence) is list:
+                newAbstract.append(sentenceStyle)
+                for partid, part in enumerate(sentence):
+                    if type(part) is dict:
+                        newAbstract.append(keywordStyle)  # 키워드에 대한 스타일
+                        newAbstract.append(str(part["matched"]))
+                        newAbstract.append(sentenceStyle)
+                    else:
 
-        sheet.append(lst)  # 엑셀 워크시트에 위 정렬된 것을 마지막 줄에 추가.
-        sheet['D' + str(id + 2)].hyperlink = url  # URL 셀 하이퍼링크 처리.
+                        if len(sentence) - 1 == partid:
+                            newAbstract.append(part + " ")
+                        else:
+                            newAbstract.append(part)
+            else:
+                newAbstract.append(str(sentence) + " ")
+        index = str(id + 2)
+        sheet.write_string('A' + index, journal, cell_format=cellformat)
+        sheet.write_string('B' + index, article.title, cell_format=cellformat)
+        if len(newAbstract) >= 1:
+            sheet.write_rich_string('C' + str(id + 2), *newAbstract)
+        else:
+            sheet.write('C' + index, "")
+        sheet.write_string('D' + str(id + 2), url, cell_format=cellformat)  # URL 셀 하이퍼링크 처리.
 
+    columnTitle = list()
     for columnLetter, column in columns.items():  # 각 열의 가로 길이를 설정하고 스타일을 설정함.
-        sheet[columnLetter + "1"] = column["title"]  # 첫번째 열에 컬럼의 이름을 입력합니다.
-        sheet.column_dimensions[columnLetter].width = column["width"]
-        for index in range(len(data) + 2):  # 컬럼 자체를 스타일 설정이 불가능하여 논문(데이터)의 개수를 세어 개수+1만큼의 행마다 스타일을 설정합니다.
-            sheet[columnLetter + str(index + 1)].alignment = Alignment(wrapText=True, vertical='center')
+        columnTitle.append({'header': column["title"]})  # 첫번째 열에 컬럼의 이름을 입력합니다.
+        sheet.set_column(columnLetter + ":" + columnLetter, column["width"], cell_format=cellformat)
 
-    table = Table(displayName="Data", ref="A1:D" + str(len(data) + 1))  # 리스트를 테이블화 함
-    style = TableStyleInfo(name="TableStyleLight9", showFirstColumn=False,
-                           showLastColumn=False, showRowStripes=True, showColumnStripes=True)
+    sheet.add_table("A1:D" + str(len(data) + 1),
+                    {'style': 'Table Style Light 9', 'columns': columnTitle})  # 리스트를 테이블화 함
 
-    table.tableStyleInfo = style  # 테이블에 스타일을 적용함
-    sheet.add_table(table)  # 워크시트에 테이블을 적용함
-
-    filename = datetime.now().strftime("%m-%d-%Y, %H-%M-%S") + ".xlsx"  # 현재 일자 시간
-    wb.save(filename)  # 현재의 일자 시간을 파일명에 사용
-
+    wb.close()
     if sys.platform.startswith('win'):  # 윈도우에서 실행 시
         os.startfile(filename)  # 엑셀 파일 실행 (윈도우가 기본 스프레드시트 프로그램을 통해 실행함)
     return filename  # 파일 이름을 최종 반환.
@@ -138,6 +122,20 @@ def getversion():
         return None
 
 
+def isSpecialChar(string):
+    # Make own character set and pass
+    # this as argument in compile method
+    regex = re.compile('[.,@_!#$%^&*()<>?/\|}{~:]')
+
+    # Pass the string in search
+    # method of regex object.
+    if (regex.search(string) == None):
+        return True
+
+    else:
+        return False
+
+
 if getattr(sys, 'frozen', False):  # EXE 파일 실행 시
     template_folder = os.path.join(sys._MEIPASS, 'templates')
     static_folder = os.path.join(sys._MEIPASS, 'static')
@@ -146,9 +144,9 @@ else:  # 스크립트 파일로 실행
     app = Flask(__name__)
 
 store = list()  # 검색 결과가 여기에 저장됨.
-resultLimit = 100 # 최대 결과 수
-keywordHighlightColor = "#ff0000" # 검색한 키워드 강조 색상
-sentenceHighlightColor = "#ffff00" # 키워드 포함 문장 강조 색상
+resultLimit = 100  # 최대 결과 수
+keywordHighlightColor = "#ff0000"  # 검색한 키워드 강조 색상 (기본 값: 빨간색)
+sentenceHighlightColor = "#008000"  # 키워드 포함 문장 강조 색상 (기본 값: 초록색)
 
 
 @app.route("/", methods=["GET", "POST"])  # 첫 화면.
@@ -163,17 +161,81 @@ def root():
         query = request.form["query"]  # 페이지의 쿼리문 입력 공간 = query.
 
         results = pubmed.query(query, max_results=int(resultLimit))  # 최대 결과 개수를 resultLimit개로 제한하고 쿼리문으로 검색함.
-        store = list(results)  # 받은 값을 배열화하고 바깥 store 에 저장함
+
+        keywords = str(query).split()
+        searchKeywords = list()
+        for keyword in keywords:
+            keyword = keyword.split("[")
+            option = ""
+            if len(keyword) == 2:
+                option = keyword[1].split("]")[0]
+            word = keyword[0]
+            if (
+                    option == "" or option == "Title/Abstract") and word.lower() != "and" and word.lower() != "or":  # 일단 Abstract 제외한 검색 유형은 제외함. AND OR는 연산자 이므로 제외함.
+                searchKeywords.append({"word": word, "option": option})
+        store = list(results)  # 받은 값을 배열화하고 바깥 store 에 저장함.
+
+        newStore = list()
+        for article in store:
+            if article.abstract or not article.abstract == "":
+                sentences = sent_tokenize(str(article.abstract))
+                newAbstractSentences = list()
+
+                count = 1
+                for sentence in sentences:
+                    count = count + 1
+                    words = word_tokenize(sentence)
+                    newSentence = list()
+                    otherWords = list()
+                    for id, word in enumerate(words):
+                        found = False
+                        for searchWord in searchKeywords:
+                            if word.lower() == searchWord["word"].lower():
+                                found = True
+
+                        if found:
+                            if isSpecialChar(words[id - 1][-1]):
+                                word = " " + word
+                            newSentence.append(TreebankWordDetokenizer().tokenize(tokens=otherWords))
+                            otherWords.clear()
+                            if isSpecialChar(words[id + 1][0]):
+                                word = word + " "
+                            newSentence.append({"matched": word})
+                        else:
+                            otherWords.append(word)
+
+                    if len(otherWords) >= 1:  # 해당 단어 뒤에 있는 내용들이 있으면 함께 추가함.
+                        newSentence.append(TreebankWordDetokenizer().tokenize(tokens=otherWords))
+
+                    if len(newSentence) <= 0:
+                        newSentence.append(TreebankWordDetokenizer().tokenize(tokens=words))
+                    else:
+                        if len(newSentence) == 1:
+                            newAbstractSentences.append(newSentence[0])
+                        else:
+                            newAbstractSentences.append(newSentence)
+                article.abstract = newAbstractSentences
+            newStore.append({
+                "abstract": article.abstract,
+                "journalissue": {
+                    "ISOName": article.journalissue["ISOName"],
+                    "PubDate_Year": article.journalissue["PubDate_Year"]
+                },
+                "title": article.title
+            })
+        # Hello world. This server is normal server you know. thank you. // Keyword : server
+        # ["Hello world.", ["This ", {"matched": "server"}, "is normal ", {"matched": "server"}, " you know."], ". thank you"]
+        # check it is object or list object, first list, it is highlight sentence, in that sentence if object, it is highlighted word.
+        # ["Seperated Sentence #1", ["Seperated word #1", {"matched": "searchWord"}, "Seperated word #2"], "Seperated Sentence #2]
 
         if len(store) == int(resultLimit):  # 데이터의 개수가 resultLimit개 인 경우 검색 결과가 잘렸음을 알림
             resultMessage = "검색 결과가 많아 " + str(resultLimit) + "개로 제한하였습니다. 검색어를 구체화하세요."
         else:
             resultMessage = str(len(store)) + "개를 찾았습니다."
-
-        return render_template('index.html', data=store, resultMsg=resultMessage)
+        return jsonify({"code": 200, "comment": resultMessage, "data": newStore,
+                        "color": {"sentence": sentenceHighlightColor, "keyword": keywordHighlightColor}})
     else:  # 접속 시.
         version = getversion()
-        print(version)
         return render_template('index.html', version=version)
 
 
@@ -201,12 +263,13 @@ def terminate():
     os._exit(0)
 
 
-@app.route("/saveconfig", methods=["POST"]) # 설정을 저장합니다
+@app.route("/saveconfig", methods=["POST"])  # 설정을 저장합니다
 def saveConfig():
     global resultLimit, keywordHighlightColor, sentenceHighlightColor
     if request.method == "POST":
         form = request.form
-        if request.form is None or (not "resultLimit" in form) or (not "titleColor" in form) or (not "sentColor" in form):
+        if request.form is None or (not "resultLimit" in form) or (not "titleColor" in form) or (
+        not "sentColor" in form):
             return Response(status=400)
         try:
             resultLimit = form["resultLimit"]
@@ -217,6 +280,11 @@ def saveConfig():
         finally:
             return jsonify({'comment': 'success'})
 
+
+@app.route("/getconfig", methods=["GET"])  # 설정을 불러옵니다.
+def getConfig():
+    global resultLimit, keywordHighlightColor, sentenceHighlightColor
+    return jsonify({"result": resultLimit, "keyword": keywordHighlightColor, "sentence": sentenceHighlightColor});
 
 
 @app.after_request
@@ -236,6 +304,6 @@ if __name__ == "__main__":
     if sys.platform.startswith('win'):
         # 윈도우에서의 오류 제거
         multiprocessing.freeze_support()
-
+    download("punkt")
     webbrowser.open("http://127.0.0.1:8484/", autoraise=True)  # Open Web browser to Local Server
     app.run(port=8484)
