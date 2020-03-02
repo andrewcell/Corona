@@ -11,6 +11,7 @@ jobs:
         - pip3 install pywin32
         - pip3 install win10toast
         - pip3 install setuptools
+        - powershell -command 'copy-item nltk_data c:\users\travis'
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH; OUTPUT=corona-windows.exe; TAG=$(git log --format=%h -1)
 # command to install dependencies
 install:
@@ -19,7 +20,7 @@ install:
 # command to run tests
 script:
   - ls -l
-  - pyinstaller --add-data 'templates;templates' --add-data 'static;static' --add-data 'pymed;pymed' --add-data 'nltk_data:nltk_data' --onefile --noconsole -n $OUTPUT corona.py
+  - pyinstaller --add-data 'templates;templates' --add-data 'static;static' --add-data 'pymed;pymed' --add-data 'nltk_data;nltk_data' --onefile --noconsole -n $OUTPUT corona.py
   #- pyinstaller --add-data 'templates;templates' --add-data 'static;static' --add-data 'pymed;pymed' --onefile -n corona-windows-dbg.exe corona.py
   - ls -l dist
 before_deploy:
