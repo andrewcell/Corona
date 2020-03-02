@@ -19,7 +19,7 @@ install:
 # command to run tests
 script:
   - ls -l
-  - pyinstaller --add-data 'templates;templates' --add-data 'static;static' --add-data 'pymed;pymed' --onefile --noconsole -n $OUTPUT corona.py
+  - pyinstaller --add-data 'templates;templates' --add-data 'static;static' --add-data 'pymed;pymed' --add-data 'nltk_data:nltk_data' --onefile --noconsole -n $OUTPUT corona.py
   #- pyinstaller --add-data 'templates;templates' --add-data 'static;static' --add-data 'pymed;pymed' --onefile -n corona-windows-dbg.exe corona.py
   - ls -l dist
 before_deploy:
