@@ -62,18 +62,22 @@ def createWorksheet(data):
 
     columns = {
         "A": {
+            "title": "#",
+            "width": 2.0
+        },
+        "B": {
             "title": "Journal",
             "width": 15.0
         },
-        "B": {
+        "C": {
             "title": "Title",
             "width": 100.0
         },
-        "C": {
+        "D": {
             "title": "Abstract",
             "width": 150.0
         },
-        "D": {
+        "E": {
             "title": "URL",
             "width": 40.0
         }
@@ -103,10 +107,10 @@ def createWorksheet(data):
 
         journal = ISOName + " " + journal_year
 
-        lst = [journal, article.title, article.abstract, url]  # 저널명 - 제목 - Abstract - 주소 순으로 정렬함.
+        lst = [id+1, journal, article.title, article.abstract, url]  # 저널명 - 제목 - Abstract - 주소 순으로 정렬함.
 
         sheet.append(lst)  # 엑셀 워크시트에 위 정렬된 것을 마지막 줄에 추가.
-        sheet['D' + str(id + 2)].hyperlink = url  # URL 셀 하이퍼링크 처리.
+        sheet['E' + str(id + 2)].hyperlink = url  # URL 셀 하이퍼링크 처리.
 
     for columnLetter, column in columns.items():  # 각 열의 가로 길이를 설정하고 스타일을 설정함.
         sheet[columnLetter + "1"] = column["title"]  # 첫번째 열에 컬럼의 이름을 입력합니다.
@@ -114,7 +118,7 @@ def createWorksheet(data):
         for index in range(len(data) + 2):  # 컬럼 자체를 스타일 설정이 불가능하여 논문(데이터)의 개수를 세어 개수+1만큼의 행마다 스타일을 설정합니다.
             sheet[columnLetter + str(index + 1)].alignment = Alignment(wrapText=True, vertical='center')
 
-    table = Table(displayName="Data", ref="A1:D" + str(len(data) + 1))  # 리스트를 테이블화 함
+    table = Table(displayName="Data", ref="A1:E" + str(len(data) + 1))  # 리스트를 테이블화 함
     style = TableStyleInfo(name="TableStyleLight9", showFirstColumn=False,
                            showLastColumn=False, showRowStripes=True, showColumnStripes=True)
 

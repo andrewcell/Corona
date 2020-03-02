@@ -111,6 +111,12 @@ $(document).ready(function() {
         $("#configModal").modal('toggle');
     });
 
+    $("#clear").click(function() {
+        $("input#query").val("");
+        $("input#first").val("");
+        location.reload();
+    });
+
     $(document).on('change', 'input', function(event) {
         if(event.target.id === "query") {
             return;
