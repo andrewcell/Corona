@@ -18,7 +18,7 @@ jobs:
 # command to install dependencies
 install:
   - pip3 install -r requirements.txt
-  - pip3 install pyinstaller
+  - pip install -Iv https://files.pythonhosted.org/packages/3c/86/909a8c35c5471919b3854c01f43843d9b5aed0e9948b63e560010f7f3429/PyInstaller-3.3.1.tar.gz
 # command to run tests
 script:
   - ls -l
