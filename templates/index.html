@@ -79,6 +79,11 @@
     </div>
     {% if data %}
         <form action="/open", method="post">
+            <div class="container-fluid">
+                <button class="btn btn-success">Submit</button>
+                <input class="btn btn-dark" id="selectall">전체선택</input>
+                <br>
+            </div>
             {% if resultMsg %}
                 <div class="container-fluid">
                     <div class="alert alert-success" role="alert">{{resultMsg}}</div>
@@ -113,8 +118,6 @@
                 {% endfor %}
               </tbody>
             </table>
-
-            <button class="btn btn-success">Submit</button>
         </form>
     {% endif %}
 {% endblock %}
