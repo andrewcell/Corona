@@ -131,22 +131,25 @@ $(document).ready(function() {
     });
 
     $(document).on('change', 'input', function(event) { // 하나라도 입력 칸이 바뀐 경우
-        if(event.target.id === "query") { // Query 입력 칸이 변경된 경우 아무것도 하지 않습니다.
-            return;
-        }
-
-        if(event.target.id === "resultLimit" || event.target.id === "titleColor" || event.target.id === "sentColor") { // 사용자가 설정을 변경한 경우
-            $(".modal-body > .alert").remove(); // 설정 팝업 내의 알림들을 제거합니다.
-            $.ajax({
-                type: "POST",
-                url: "/saveconfig",
-                data: $("#configForm").serialize(),
-                error: function() {
-                    $(".modal-body").prepend("<div class='alert alert-danger'>오류로 인해 설정이 반영되지 않았습니다.</div>"); // 오류를 받은 경우
-                }
-            });
-        } else { // 그 외의 경우는 Query 생성기를 작동
-            generateQuery()
+        switch (event.target.id) {
+            case "query":
+                return;
+            case "selectAll":
+                 $('input:checkbox').not(this).prop('checked', this.checked);
+                break;
+            case "resultLimit":
+                $(".modal-body > .alert").remove(); // 설정 팝업 내의 알림들을 제거합니다.
+                $.ajax({
+                    type: "POST",
+                    url: "/saveconfig",
+                    data: $("#configForm").serialize(),
+                    error: function() {
+                        $(".modal-body").prepend("<div class='alert alert-danger'>오류로 인해 설정이 반영되지 않았습니다.</div>"); // 오류를 받은 경우
+                    }
+                });
+                break;
+            default:
+                generateQuery()
         }
     });
 

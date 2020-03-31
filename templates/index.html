@@ -81,8 +81,7 @@
         <form action="/open", method="post">
             <div class="container-fluid">
                 <button class="btn btn-success">Submit</button>
-                <input class="btn btn-dark" id="selectall">전체선택</input>
-                <br>
+                <p></p>
             </div>
             {% if resultMsg %}
                 <div class="container-fluid">
@@ -93,7 +92,7 @@
               <thead>
                 <tr>
                     <th scope="col">#</th>
-                    <th scope="col">Include</th>
+                    <th scope="col"><input id="selectAll" type="checkbox" checked /></th>
                     <th scope="col">Journal</th>
                     <th scope="col">Title</th>
                     <th scope="col">Abstract</th>

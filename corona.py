@@ -21,42 +21,8 @@ from openpyxl.styles import Alignment
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 
-# 엑셀 파일 생
-def createWorksheet(data):
-    # { Example Data
-    #    "abstract": "Cancer remains a leading cause of death, despite multimodal treatment approaches. Even in patients with a healthy immune response, cancer cells can escape the immune system during tumorigenesis. Cancer cells incapacitate the normal cell-mediated immune system by expressing immune modulation ligands such as programmed death (PD) ligand 1, the B7 molecule, or secreting activators of immune modulators. Chimeric antigen receptor (CAR) T cells were originally designed to target cancer cells. Engineered approaches allow CAR T cells, which possess a simplified yet specific receptor, to be easily activated in limited situations. CAR T cell treatment is a derivative of the antigen-antibody reaction and can be applied to various diseases. In this review, the current successes of CAR T cells in cancer treatment and the therapeutic potential of CAR T cells are discussed.",
-    #    "authors": [
-    #        {
-    #            "affiliation": "Department of Pharmacology, Chonnam National University Medical School, Hwasun, Korea.",
-    #            "firstname": "Somy",
-    #            "initials": "S",
-    #            "lastname": "Yoon"
-    #        },
-    #        {
-    #            "affiliation": "Department of Pharmacology, Chonnam National University Medical School, Hwasun, Korea.",
-    #            "firstname": "Gwang Hyeon",
-    #            "initials": "GH",
-    #           "lastname": "Eom"
-    #       }
-    #    ],
-    #    "conclusions": null,
-    #    "copyrights": "\u00a9 Chonnam Medical Journal, 2020.",
-    #    "doi": "10.4068/cmj.2020.56.1.6",
-    #    "journal": "Chonnam medical journal",
-    #    "keywords": [
-    #        "CAR T cell",
-    #        "Combined Modality Therapy",
-    #        "Ligands",
-    #        "Neoplasms",
-    #        "T-Lymphocytes"
-    #    ],
-    #    "methods": null,
-    #    "publication_date": "2020-02-06",
-    #    "pubmed_id": "32021836\n17344846\n16417215\n25893595\n28799485\n11403834\n31019670\n29742380\n25510272\n28726836\n21994741\n26663085\n19459844\n30592986\n26568292\n30082599\n29385370\n28983798\n18034592\n25765070\n10585967\n31511695\n21293511\n28857075\n29855723\n23636127\n27785449\n25999455\n30261221\n19132916\n19636327\n27365313\n31723827\n28936279\n22129804\n29686425\n27626062\n30747012\n29389859\n25440610\n28652918\n29025771\n18986838\n28555670\n29667553\n28292435\n11585784\n24076584\n24432303\n25501578\n29226797\n18541331\n27207799\n18481901\n23546520\n30036350",
-    #    "results": null,
-    #    "title": "Chimeric Antigen Receptor T Cell Therapy: A Novel Modality for Immune Modulation.",
-    #    "xml": "<Element 'PubmedArticle' at 0x106847f50>"
-    # }
+# 엑셀 파일 생성.
+def createWorksheet(data, query):
     wb = Workbook()
     sheet = wb.active
 
@@ -125,8 +91,8 @@ def createWorksheet(data):
     table.tableStyleInfo = style  # 테이블에 스타일을 적용함
     sheet.add_table(table)  # 워크시트에 테이블을 적용함
 
-    filename = datetime.now().strftime("%m-%d-%Y, %H-%M-%S") + ".xlsx"  # 현재 일자 시간
-    wb.save(filename)  # 현재의 일자 시간을 파일명에 사용
+    filename = query + "_" + datetime.now().strftime("%Y%m%d") + ".xlsx"  # 쿼리, 현재 일자
+    wb.save(filename)
 
     if sys.platform.startswith('win'):  # 윈도우에서 실행 시
         os.startfile(filename)  # 엑셀 파일 실행 (윈도우가 기본 스프레드시트 프로그램을 통해 실행함)
@@ -151,13 +117,11 @@ else:  # 스크립트 파일로 실행
 
 store = list()  # 검색 결과가 여기에 저장됨.
 resultLimit = 100 # 최대 결과 수
-keywordHighlightColor = "#ff0000" # 검색한 키워드 강조 색상
-sentenceHighlightColor = "#ffff00" # 키워드 포함 문장 강조 색상
-
+query = ""
 
 @app.route("/", methods=["GET", "POST"])  # 첫 화면.
 def root():
-    global store, resultLimit, keywordHighlightColor, sentenceHighlightColor  # 위에서 만든 변수들을 사용
+    global store, resultLimit, query # 위에서 만든 변수들을 사용
     if request.method == 'POST':  # 검색 버튼으로 요청했을 경우.
         pubmed = PubMed(tool="MyTool", email="my@email.address")
 
@@ -183,7 +147,7 @@ def root():
 
 @app.route("/open", methods=["POST", "GET"])  # 선택된 논문을 처리합니다.
 def open():
-    global store, keywordHighlightColor, sentenceHighlightColor
+    global store, query
     if request.method == "POST":
         if (not "selected" in request.form) or request.form["selected"] == "":  # 선택된 논문이 없을경우.
             return render_template("index.html", err="선택된 논문이 없습니다.")
@@ -193,7 +157,7 @@ def open():
         for item in request.form.getlist("selected"):
             lists.append(store[int(item)])  # 선택된 논문을 배열에 집어넣습니다.
 
-        filename = createWorksheet(lists)
+        filename = createWorksheet(lists, query)
         if filename:  # 파일명을 받은 경우 파일명과 함께 메세지를 표출합니다.
             return render_template("index.html", msg=filename + " 파일이 생성되었습니다.")
     else:
@@ -207,15 +171,13 @@ def terminate():
 
 @app.route("/saveconfig", methods=["POST"]) # 설정을 저장합니다
 def saveConfig():
-    global resultLimit, keywordHighlightColor, sentenceHighlightColor
+    global resultLimit
     if request.method == "POST":
         form = request.form
-        if request.form is None or (not "resultLimit" in form) or (not "titleColor" in form) or (not "sentColor" in form):
+        if request.form is None or (not "resultLimit" in form):
             return Response(status=400)
         try:
             resultLimit = form["resultLimit"]
-            keywordHighlightColor = form["titleColor"]
-            sentenceHighlightColor = form["sentColor"]
         except:
             return Response(status=400)
         finally:
